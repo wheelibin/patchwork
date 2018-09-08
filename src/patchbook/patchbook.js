@@ -1,12 +1,12 @@
 const patterns = {
   voice: { pattern: /^\s*\b(.+):/g, groups: { voice: 1 } },
   connection: {
-    pattern: /-\s?(.+?(?=\())\((.+?(?=\)))\)\s+(>>|->|[a-z]>)\s+(.+)\((.+?(?=\)))\)/,
+    pattern: /^\s*-\s?(.+?(?=\())\((.+?(?=\)))\)\s+(>>|->|[a-z]>)\s+(.+)\((.+?(?=\)))\)/,
     groups: { outModule: 1, outName: 2, connectionType: 3, inModule: 4, inName: 5 }
   },
   singleLineParam: { pattern: /\*\s+(.+(?=:)):\s+(.+)/, groups: { module: 1, params: 2 } },
   multiLineParamModuleName: { pattern: /\*\s+(.+(?=:)):\s*$/g, groups: { module: 1 } },
-  multiLineParam: { pattern: /^\s+\|\s+(.+(?==))=\s+(.+)/, groups: { param: 1, value: 2 } },
+  multiLineParam: { pattern: /^\s*\|\s+(.+(?==))=\s+(.+)/, groups: { param: 1, value: 2 } },
   comment: { pattern: /^\/\/[\s?](.+)/ }
 };
 
@@ -28,8 +28,54 @@ export const parse = pb => {
   const voices = [];
   let modules = {};
   const multiLineParamModules = [];
+
   const lines = pb.split("\n");
 
+  // Do a first pass to get all the parameters
+  // this ensures the modules are added in the order specified in the params section, rather than in the order they appear in connections
+  lines.forEach(line => {
+    const singleLineParamMatch = patterns.singleLineParam.pattern.exec(line);
+    if (singleLineParamMatch) {
+      const module = singleLineParamMatch[patterns.singleLineParam.groups.module].trim();
+      const rawParams = singleLineParamMatch[patterns.singleLineParam.groups.params].split("|");
+      const params = rawParams.map(p => {
+        const kv = p.split("=");
+        return {
+          parameter: kv[0].trim(),
+          value: (kv[1] || "").trim()
+        };
+      });
+      if (!modules[module]) {
+        modules = { ...modules, [module]: [] };
+      }
+      modules[module] = params;
+    }
+
+    const multiLineParamModuleNameMatch = patterns.multiLineParamModuleName.pattern.exec(line);
+    if (multiLineParamModuleNameMatch) {
+      const module = multiLineParamModuleNameMatch[patterns.multiLineParamModuleName.groups.module].trim();
+      multiLineParamModules.push(module);
+      if (!modules[module]) {
+        modules = { ...modules, [module]: [] };
+      }
+    }
+
+    const multiLineParamMatch = patterns.multiLineParam.pattern.exec(line);
+    if (multiLineParamMatch) {
+      const param = multiLineParamMatch[patterns.multiLineParam.groups.param].trim();
+      const value = multiLineParamMatch[patterns.multiLineParam.groups.value].trim();
+
+      if (multiLineParamModules[multiLineParamModules.length - 1]) {
+        const multiLineParamModuleName = multiLineParamModules[multiLineParamModules.length - 1].trim();
+        modules[multiLineParamModuleName].push({
+          parameter: param,
+          value: value
+        });
+      }
+    }
+  });
+
+  // Now do another pass to read the voices and connections
   lines.forEach(line => {
     const voiceMatch = patterns.voice.pattern.exec(line);
     if (voiceMatch) {
@@ -74,44 +120,6 @@ export const parse = pb => {
           modules = { ...modules, [inModule]: [] };
         }
       }
-    }
-
-    const singleLineParamMatch = patterns.singleLineParam.pattern.exec(line);
-    if (singleLineParamMatch) {
-      const module = singleLineParamMatch[patterns.singleLineParam.groups.module].trim();
-      const rawParams = singleLineParamMatch[patterns.singleLineParam.groups.params].split("|");
-      const params = rawParams.map(p => {
-        const kv = p.split("=");
-        return {
-          parameter: kv[0].trim(),
-          value: kv[1].trim()
-        };
-      });
-      if (!modules[module]) {
-        modules = { ...modules, [module]: [] };
-      }
-      modules[module] = params;
-    }
-
-    const multiLineParamModuleNameMatch = patterns.multiLineParamModuleName.pattern.exec(line);
-    if (multiLineParamModuleNameMatch) {
-      const module = multiLineParamModuleNameMatch[patterns.multiLineParamModuleName.groups.module].trim();
-      multiLineParamModules.push(module);
-      if (!modules[module]) {
-        modules = { ...modules, [module]: [] };
-      }
-    }
-
-    const multiLineParamMatch = patterns.multiLineParam.pattern.exec(line);
-    if (multiLineParamMatch) {
-      const param = multiLineParamMatch[patterns.multiLineParam.groups.param].trim();
-      const value = multiLineParamMatch[patterns.multiLineParam.groups.value].trim();
-
-      const multiLineParamModuleName = multiLineParamModules[multiLineParamModules.length - 1].trim();
-      modules[multiLineParamModuleName].push({
-        parameter: param,
-        value: value
-      });
     }
   });
 
