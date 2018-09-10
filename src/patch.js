@@ -1,4 +1,8 @@
 export const patch1 = `
+// ++++++ //
+// VOICES //
+// ++++++ //
+
 // Bangin' techno shit
 DRUMS: 
   - ADE-32 (OUT:1) t> BIA (Trig)
@@ -9,7 +13,7 @@ DRUMS:
   - Maths (Ch2) >> BIA (Harm)
   - Maths (Ch3) >> BIA (Attack)  
   - Mother-32 (NOISE) -> Quad VCA (IN 2)
-  
+
 // Gnarly acid bass
 VOICE 1:	
   - ADE-32 (OUT:2) p> Mother-32 (VCO 1V/OCT)  
@@ -24,22 +28,27 @@ VOICE 1:
   - Mother-32 (VCA) -> AUDIO INTERFACE (Ch1)
   - Quad VCA (OUT 4) -> AUDIO INTERFACE (Ch2)
 
-  * Mother-32:
-  | RACK_ROW = 1
+
+// +++++++++++++++++ //
+// MODULE PARAMETERS //
+// +++++++++++++++++ //
+* Mother-32:
+  // Patchwork RACK_ROW option
+  | RACK_ROW = 1 
   | Pulse Width = 1
   | VCO Mod Amount = 2.1
   | Cutoff = 4
 
-	* ADE-32:
+* ADE-32:
   | RACK_ROW = 2
-	| Ch1 Type = PULSE
-	| Ch1 Div = 1
-	| Ch1 Offset = 0
+  | Ch1 Type = PULSE
+  | Ch1 Div = 1
+  | Ch1 Offset = 0
   | Ch1 Option = false	
   | Ch2 Type = ARPS
-	| Ch2 Div = 1
-	| Ch2 Offset = 1/4
-	| Ch2 Loop/Arp = 3  
+  | Ch2 Div = 1
+  | Ch2 Offset = 1/4
+  | Ch2 Loop/Arp = 3  
   | Ch3 Type = LFO RMP
   | Ch3 Div = 2
   | Ch3 Offset = 1/4
@@ -57,18 +66,18 @@ VOICE 1:
   | Ch7 Div = 2
   | Ch7 Offset = 0  
 
-	* Maths:
+* Maths:
   | RACK_ROW = 2
-	| Ch1 Rise = 0
-	| Ch1 Fall = 72%
+  | Ch1 Rise = 0
+  | Ch1 Fall = 72%
   | Ch1 Response = EXP
   | Ch2 = 1pm
-	| Ch3 = 1pm
-	| Ch4 Rise = 0
+  | Ch3 = 1pm
+  | Ch4 Rise = 0
   | Ch4 Fall = 76%
   | Ch4 Response = EXP
   
-  * BIA: 
+* BIA: 
   | RACK_ROW = 2
   | Pitch = 25%
   | Spread = 0
@@ -80,11 +89,11 @@ VOICE 1:
   | SLM = Liquid
   | BAT = Alto
   
-  * Disting-Mk4: RACK_ROW = 2 | Program = B4 | ClockSpeed = 1/4  
+* Disting-Mk4: RACK_ROW = 2 | Program = B4 | ClockSpeed = 1/4  
 
-  * LXd: RACK_ROW = 2
+* LXd: RACK_ROW = 2
 
-  * Quad VCA:
+* Quad VCA:
   | RACK_ROW = 2
   | Ch2 CV = 100%
   | Ch2 Boost = Off
@@ -98,28 +107,9 @@ VOICE 1:
   | Ch4 Level = 100%
 `;
 
-export const patch2 = `VOICE 1:
-- Metropolis (Pitch) p> Braids (1v/oct) [weight=3]
-- Metropolis (Gate) g> Function (Trigger)
-- Braids (Out) -> Optomix (Ch1 Signal)
-- Function (+ Out) >> Optomix (Ch1 CV)
-- Function (- Out) >> Braids (Timbre CV)
-//- Maths (Ch1) -> Braids (IN)
-- Optomix (Out 1) -> AUDIO INTERFACE (input)
-
-* Metropolis:
-| BPM = 124
-| Swing = 0
-| Root = F
-| Scale = Minor
-| Mode = F. Forward
-| Stages = 16
-
-* Braids:
-| Mode = Fold
-| Timbre = 30%
-| Timbre CV = -20%
-| Color = 0%
-
-* Function: RACK_ROW = 2 | Rise = 50% | Fall = 50% | Curve = 30%
-* Optomix: RACK_ROW = 2 | Damp = 0% | Control = 100%`;
+export const mathsBouncingBall = `
+BouncingBall:
+  	- A Clock Source (CLOCK OUT) -> Maths (Ch1 TRIG)
+	- Maths (Ch1) -> Maths (Ch4 BOTH) 
+	- Maths (Ch1 EOR) -> Maths (Ch4 CYCLE)
+	- Maths (Ch4) -> VCA or LPG (CV IN)`;

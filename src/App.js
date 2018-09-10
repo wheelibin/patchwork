@@ -3,14 +3,14 @@ import Grid from "@material-ui/core/Grid";
 // import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 
 import "./App.css";
-import Rack from "./Rack";
+import Rack from "./components/Rack";
 import PatchBookEditor from "./components/PatchBookEditor";
 import moduleDB from "./modules.json";
 
 import * as patch from "./patch";
 import * as patchbook from "./patchbook/patchbook";
 
-const moduleHeight = 400;
+const moduleHeight = 300;
 
 // const theme = createMuiTheme();
 
@@ -36,7 +36,7 @@ class App extends Component {
   render() {
     let rack = null;
     if (this.state.rackContainerWidth) {
-      rack = <Rack patch={this.state.patch} modules={moduleDB} moduleHeight={moduleHeight} spacing={0} rackWidth={this.state.rackContainerWidth} />;
+      rack = <Rack patch={this.state.patch} moduleDb={moduleDB} moduleHeight={moduleHeight} spacing={0} rackWidth={this.state.rackContainerWidth} />;
     }
     return (
       // <MuiThemeProvider theme={theme}>

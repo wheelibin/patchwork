@@ -1,7 +1,7 @@
-const patterns = {
-  voice: { pattern: /^\s*\b(.+):/g, groups: { voice: 1 } },
+export const patterns = {
+  voice: { pattern: /^\s*\b(.+):\s*$/g, groups: { voice: 1 } },
   connection: {
-    pattern: /^\s*-\s?(.+?(?=\())\((.+?(?=\)))\)\s+(>>|->|[a-z]>)\s+(.+)\((.+?(?=\)))\)/,
+    pattern: /^\s*-\s?(.+?(?=\())\((.+?(?=\)))\)\s+(>>|->|[a-z]>)\s+(.+)\((.+?(?=\)))\)\s*$/m,
     groups: { outModule: 1, outName: 2, connectionType: 3, inModule: 4, inName: 5 }
   },
   singleLineParam: { pattern: /\*\s+(.+(?=:)):\s+(.+)/, groups: { module: 1, params: 2 } },
