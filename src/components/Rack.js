@@ -1,4 +1,4 @@
-/* globals window Image */
+/* globals window document Image */
 
 import React, { Component } from "react";
 import PropTypes from "prop-types";
@@ -8,48 +8,39 @@ class Rack extends Component {
   constructor() {
     super();
     this.canvasRef = React.createRef();
+    this.rackRef = React.createRef();
     this.patch = {};
     this.moduleHeight = 0;
   }
   componentDidMount() {
-    this.canvas = this.canvasRef.current;
+    this.canvas = document.createElement("canvas");
+    this.canvas.onclick = this.handleCanvasClick;
+    this.canvasContext = this.canvas.getContext("2d");
+    this.rackRef.current.appendChild(this.canvas);
     this.Init();
   }
-  componentDidUpdate(prevProps) {
-    if (this.props.patch !== prevProps.patch) {
-      this.Init();
-    }
+  componentDidUpdate() {
+    //this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.Init();
   }
-  InitCanvas(patch, rackWidth, moduleHeight, devicePixelRatio) {
-    this.canvas.width = rackWidth;
-    this.canvas.height = this.getMaxRow(patch) * moduleHeight + moduleHeight;
 
-    // upscale the canvas content
-    this.canvas.width = this.canvas.width * devicePixelRatio;
-    this.canvas.height = this.canvas.height * devicePixelRatio;
-    // downscale the presentation
-    this.canvas.style.width = (this.canvas.width / devicePixelRatio).toString() + "px";
-    this.canvas.style.height = (this.canvas.height / devicePixelRatio).toString() + "px";
-
-    this.canvasContext = this.canvas.getContext("2d");
-    this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
   Init() {
-    const { moduleDb, patch, moduleHeight, rackWidth, spacing } = this.props;
+    const { moduleDb, patch, moduleHeight, rackWidth, spacing, displayVoices } = this.props;
 
     const devicePixelRatio = window.devicePixelRatio;
-
     this.modulesToDisplay = [];
 
     this.config = {
       devicePixelRatio: devicePixelRatio,
       moduleHeight: moduleHeight,
       spacing: spacing,
-      paddingTop: 10 * devicePixelRatio,
+      paddingTop: 20,
       jackIndicatorRadius: (moduleHeight / 40) * devicePixelRatio,
       cableWidth: (moduleHeight / 50) * devicePixelRatio,
-      cableSagMin: 150,
-      cableSagMax: moduleHeight + moduleHeight / 3,
+      // cableSagMin: 150,
+      // cableSagMax: moduleHeight + moduleHeight / 3,
+      cableSagMin: moduleHeight / 1.2,
+      cableSagMax: moduleHeight / 1.2,
       inputJackColours: {
         fill: "rgba(178, 242, 0, 0.3)",
         border: "rgba(178, 242, 0, 0.5)"
@@ -68,12 +59,27 @@ class Rack extends Component {
           Clock: `rgba(243, 0, 33, ${alpha})`
         };
         return connectionColours[type];
-      }
+      },
+      displayVoices: displayVoices
     };
 
     this.InitCanvas(patch, rackWidth, moduleHeight, devicePixelRatio);
+
     this.renderRack(patch, moduleDb);
   }
+
+  InitCanvas(patch, rackWidth, moduleHeight, devicePixelRatio) {
+    this.canvas.width = rackWidth;
+    this.canvas.height = this.getMaxRow(patch) * moduleHeight + moduleHeight;
+
+    // upscale the canvas content
+    this.canvas.width = this.canvas.width * devicePixelRatio;
+    this.canvas.height = this.canvas.height * devicePixelRatio;
+    // downscale the presentation
+    this.canvas.style.width = (this.canvas.width / devicePixelRatio).toString() + "px";
+    this.canvas.style.height = (this.canvas.height / devicePixelRatio).toString() + "px";
+  }
+
   renderRack = (patch, moduleDb) => {
     const totalModulesInPatch = Object.keys(patch.modules).length;
     let imagesLoaded = 0;
@@ -89,7 +95,9 @@ class Rack extends Component {
       moduleDef.ActualImage.onload = () => {
         imagesLoaded += 1;
         if (imagesLoaded === totalModulesInPatch) {
-          rackFunctions.drawRack(patch, this.modulesToDisplay, this.canvasContext, this.config);
+          window.requestAnimationFrame(() => {
+            rackFunctions.drawRack(patch, this.modulesToDisplay, this.canvasContext, this.config);
+          });
         }
       };
       moduleDef.ActualImage.src = moduleDef.image;
@@ -97,35 +105,33 @@ class Rack extends Component {
       this.modulesToDisplay.push(moduleDef);
     });
   };
-
   handleCanvasClick = e => {
+    const { onJackClick } = this.props;
     const rect = this.canvas.getBoundingClientRect();
     const clickPos = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
     };
-    let hit = false;
+
+    let jackHit = null;
 
     this.modulesToDisplay.forEach(moduleDef => {
       Object.keys(moduleDef.inputs).forEach(input => {
         if (this.isIntersect(clickPos, moduleDef.inputs[input], moduleDef)) {
-          console.log(`${moduleDef.name}::input::${input}`);
-          hit = true;
+          jackHit = { module: moduleDef.name, type: "input", jack: input };
         }
       });
-      if (hit) {
-        return;
+      if (!jackHit) {
+        Object.keys(moduleDef.outputs).forEach(output => {
+          if (this.isIntersect(clickPos, moduleDef.outputs[output], moduleDef)) {
+            jackHit = { module: moduleDef.name, type: "output", jack: output };
+          }
+        });
       }
-      Object.keys(moduleDef.outputs).forEach(output => {
-        if (this.isIntersect(clickPos, moduleDef.outputs[output], moduleDef)) {
-          console.log(`${moduleDef.name}::output::${output}`, clickPos, moduleDef);
-          hit = true;
-        }
-      });
     });
 
-    if (hit) {
-      console.log("Do something");
+    if (jackHit && onJackClick) {
+      onJackClick(jackHit);
     }
   };
   isIntersect = (point, inout, moduleDef) => {
@@ -153,11 +159,7 @@ class Rack extends Component {
   };
 
   render() {
-    return (
-      <div>
-        <canvas ref={this.canvasRef} height={this.props.moduleHeight} onClick={this.handleCanvasClick} />
-      </div>
-    );
+    return <div ref={this.rackRef} />;
   }
 }
 
@@ -166,7 +168,9 @@ Rack.propTypes = {
   moduleHeight: PropTypes.number.isRequired,
   spacing: PropTypes.number,
   patch: PropTypes.object.isRequired,
-  rackWidth: PropTypes.number.isRequired
+  rackWidth: PropTypes.number.isRequired,
+  displayVoices: PropTypes.array.isRequired,
+  onJackClick: PropTypes.func
 };
 
 export default Rack;

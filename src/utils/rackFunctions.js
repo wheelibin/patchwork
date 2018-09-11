@@ -32,17 +32,19 @@ export const drawRack = (patch, modulesToDisplay, canvasContext, config) => {
   });
 
   patch.voices.forEach(v => {
-    v.connections.forEach(conn => {
-      const mOut = modulesToDisplay.find(m => m.name === conn.outModule);
-      const mIn = modulesToDisplay.find(m => m.name === conn.inModule);
+    if (config.displayVoices.find(dv => dv === v.name)) {
+      v.connections.forEach(conn => {
+        const mOut = modulesToDisplay.find(m => m.name === conn.outModule);
+        const mIn = modulesToDisplay.find(m => m.name === conn.inModule);
 
-      if (mOut && mIn) {
-        let output = mOut.outputs[conn.outName];
-        let input = mIn.inputs[conn.inName];
+        if (mOut && mIn) {
+          let output = mOut.outputs[conn.outName];
+          let input = mIn.inputs[conn.inName];
 
-        drawConnection(canvasContext, output, input, mOut, mIn, conn.connectionType, config.devicePixelRatio, config);
-      }
-    });
+          drawConnection(canvasContext, output, input, mOut, mIn, conn.connectionType, config.devicePixelRatio, config);
+        }
+      });
+    }
   });
 };
 

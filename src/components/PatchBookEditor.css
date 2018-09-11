@@ -1,6 +1,7 @@
 .CodeMirror {
   text-align: left;
   height: 100vh !important;
+  width: 100%;
   font-family: "Roboto Mono", monospace !important;
   font-size: 0.8em !important;
   padding-left: 4px;

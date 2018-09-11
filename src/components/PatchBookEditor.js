@@ -30,10 +30,11 @@ class PatchBookEditor extends Component {
       CodeMirror.defineSimpleMode("patchbook", PatchBookMode);
       this.codeMirror = CodeMirror.fromTextArea(element, {
         mode: "patchbook",
+        tabSize: 2,
         theme: "monokai"
       });
       const { onMarkupChanged } = this.props;
-      this.codeMirror.on("change", () => {
+      this.codeMirror.on("changes", () => {
         onMarkupChanged(this.codeMirror.getValue());
       });
 

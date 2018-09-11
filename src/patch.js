@@ -109,7 +109,7 @@ VOICE 1:
 
 export const mathsBouncingBall = `
 BouncingBall:
-  	- A Clock Source (CLOCK OUT) -> Maths (Ch1 TRIG)
+  - A Clock Source (CLOCK OUT) -> Maths (Ch1 TRIG)
 	- Maths (Ch1) -> Maths (Ch4 BOTH) 
 	- Maths (Ch1 EOR) -> Maths (Ch4 CYCLE)
 	- Maths (Ch4) -> VCA or LPG (CV IN)`;
