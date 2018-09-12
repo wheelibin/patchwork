@@ -40,7 +40,7 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      markup: patch.basicKrell,
+      markup: patch.patch1,
       patch: {},
       rackContainerWidth: 0,
       moduleHeight: 400,

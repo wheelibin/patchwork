@@ -26,7 +26,7 @@ VOICE 1:
   - LXd (12db Out) -> Disting-Mk4 (X)  
   - Mother-32 (VCO PULSE) -> LXd (12db In)
   - Mother-32 (VCA) -> AUDIO INTERFACE (Ch1)
-  - Quad VCA (OUT 4) -> AUDIO INTERFACE (Ch2)
+  - Quad VCA (4/MIX) -> AUDIO INTERFACE (Ch2)
 
 
 // +++++++++++++++++ //

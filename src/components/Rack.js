@@ -20,7 +20,7 @@ class Rack extends PureComponent {
     this.Init();
   }
   componentDidUpdate() {
-    //this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    console.log("Rack.componentDidUpdate");
     this.Init();
   }
 
@@ -85,7 +85,9 @@ class Rack extends PureComponent {
   }
 
   renderRack = (patch, moduleDb, moduleHeight, devicePixelRatio) => {
-    if (!patch.modules) {
+    if (!patch.modules || !Object.keys(patch.modules).length) {
+      // No patch, so clear canvas and return
+      this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
       return;
     }
     const totalModulesInPatch = Object.keys(patch.modules).length;
