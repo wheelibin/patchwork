@@ -113,3 +113,20 @@ BouncingBall:
 	- Maths (Ch1) -> Maths (Ch4 BOTH) 
 	- Maths (Ch1 EOR) -> Maths (Ch4 CYCLE)
 	- Maths (Ch4) -> VCA or LPG (CV IN)`;
+
+export const basicKrell = `
+Basic Krell:
+	- VCO (OUT) -> VCA (IN)	
+	- Maths (Ch4 Unity) >> VCA (CV IN)
+	- Maths (Ch4 EOC) t> Random Source (Trigger)
+	- Random Source (Pitch CV) p> VCO (1V/OCT)
+	- Random Source (Pitch CV) p> Maths (Ch4 BOTH)
+	
+
+* Maths:
+
+* Random Source:
+
+* VCO:
+
+* VCA:`;

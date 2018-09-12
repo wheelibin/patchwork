@@ -1,10 +1,10 @@
 /* globals window document Image */
 
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import * as rackFunctions from "../utils/rackFunctions";
 
-class Rack extends Component {
+class Rack extends PureComponent {
   constructor() {
     super();
     this.canvasRef = React.createRef();
@@ -25,7 +25,7 @@ class Rack extends Component {
   }
 
   Init() {
-    const { moduleDb, patch, moduleHeight, rackWidth, spacing, displayVoices } = this.props;
+    const { moduleDb, patch, moduleHeight, spacing, displayVoices } = this.props;
 
     const devicePixelRatio = window.devicePixelRatio;
     this.modulesToDisplay = [];
@@ -63,14 +63,18 @@ class Rack extends Component {
       displayVoices: displayVoices
     };
 
-    this.InitCanvas(patch, rackWidth, moduleHeight, devicePixelRatio);
-
-    this.renderRack(patch, moduleDb);
+    this.renderRack(patch, moduleDb, moduleHeight, devicePixelRatio);
   }
 
-  InitCanvas(patch, rackWidth, moduleHeight, devicePixelRatio) {
-    this.canvas.width = rackWidth;
-    this.canvas.height = this.getMaxRow(patch) * moduleHeight + moduleHeight;
+  InitCanvas(patch, moduleHeight, devicePixelRatio) {
+    let totalModuleWidth = 0;
+    this.modulesToDisplay.filter(m => m.ActualImage).forEach(m => {
+      const adjustmentRatio = moduleHeight / m.ActualImage.height;
+      totalModuleWidth += m.ActualImage.width * adjustmentRatio;
+    });
+
+    this.canvas.width = totalModuleWidth;
+    this.canvas.height = this.getMaxRow(patch) * moduleHeight + moduleHeight / 2;
 
     // upscale the canvas content
     this.canvas.width = this.canvas.width * devicePixelRatio;
@@ -80,7 +84,10 @@ class Rack extends Component {
     this.canvas.style.height = (this.canvas.height / devicePixelRatio).toString() + "px";
   }
 
-  renderRack = (patch, moduleDb) => {
+  renderRack = (patch, moduleDb, moduleHeight, devicePixelRatio) => {
+    if (!patch.modules) {
+      return;
+    }
     const totalModulesInPatch = Object.keys(patch.modules).length;
     let imagesLoaded = 0;
     Object.keys(patch.modules).forEach(moduleName => {
@@ -96,6 +103,7 @@ class Rack extends Component {
         imagesLoaded += 1;
         if (imagesLoaded === totalModulesInPatch) {
           window.requestAnimationFrame(() => {
+            this.InitCanvas(patch, moduleHeight, devicePixelRatio);
             rackFunctions.drawRack(patch, this.modulesToDisplay, this.canvasContext, this.config);
           });
         }
@@ -118,13 +126,13 @@ class Rack extends Component {
     this.modulesToDisplay.forEach(moduleDef => {
       Object.keys(moduleDef.inputs).forEach(input => {
         if (this.isIntersect(clickPos, moduleDef.inputs[input], moduleDef)) {
-          jackHit = { module: moduleDef.name, type: "input", jack: input };
+          jackHit = { module: moduleDef.name, type: "IN", jack: input };
         }
       });
       if (!jackHit) {
         Object.keys(moduleDef.outputs).forEach(output => {
           if (this.isIntersect(clickPos, moduleDef.outputs[output], moduleDef)) {
-            jackHit = { module: moduleDef.name, type: "output", jack: output };
+            jackHit = { module: moduleDef.name, type: "OUT", jack: output };
           }
         });
       }
@@ -134,16 +142,20 @@ class Rack extends Component {
       onJackClick(jackHit);
     }
   };
-  isIntersect = (point, inout, moduleDef) => {
+
+  isIntersect = (point, jack, moduleDef) => {
     if (!moduleDef.offset) {
       return false;
     }
 
-    const inoutX = inout.x * moduleDef.sizeAdjustmentRatio;
-    const inoutY = inout.y * moduleDef.sizeAdjustmentRatio;
+    const jackPosition = {
+      x: jack.x * moduleDef.sizeAdjustmentRatio,
+      y: jack.y * moduleDef.sizeAdjustmentRatio
+    };
 
     return (
-      Math.sqrt((point.x - (inoutX + moduleDef.offset.x)) ** 2 + (point.y - (inoutY + moduleDef.offset.y)) ** 2) < this.config.jackIndicatorRadius
+      Math.sqrt((point.x - (jackPosition.x + moduleDef.offset.x)) ** 2 + (point.y - (jackPosition.y + moduleDef.offset.y)) ** 2) <
+      this.config.jackIndicatorRadius
     );
   };
   getMaxRow = patch => {
@@ -168,7 +180,6 @@ Rack.propTypes = {
   moduleHeight: PropTypes.number.isRequired,
   spacing: PropTypes.number,
   patch: PropTypes.object.isRequired,
-  rackWidth: PropTypes.number.isRequired,
   displayVoices: PropTypes.array.isRequired,
   onJackClick: PropTypes.func
 };

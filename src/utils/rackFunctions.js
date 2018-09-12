@@ -1,10 +1,4 @@
 export const drawRack = (patch, modulesToDisplay, canvasContext, config) => {
-  //let totalModuleWidth = 0;
-  // this.moduleDb.filter(m => m.ActualImage).forEach(m => {
-  //   const adjustmentRatio = this.moduleHeight / m.ActualImage.height;
-  //   totalModuleWidth += m.ActualImage.width * adjustmentRatio;
-  // });
-
   const moduleRows = {};
   Object.keys(patch.modules).forEach(moduleName => {
     const rowParam = patch.modules[moduleName].find(p => p.parameter === "RACK_ROW");
@@ -63,7 +57,7 @@ export const createMockupModule = (patch, moduleName) => {
 
   patch.voices.forEach(v => {
     v.connections.forEach(conn => {
-      if (conn.inModule === moduleName) {
+      if (conn.inModule === moduleName && !inputs[conn.inName]) {
         inputs[conn.inName] = {
           x: inputCoords.x,
           y: inputCoords.y
@@ -71,7 +65,7 @@ export const createMockupModule = (patch, moduleName) => {
         inputCoords.y += 120;
       }
 
-      if (conn.outModule === moduleName) {
+      if (conn.outModule === moduleName && !outputs[conn.outName]) {
         outputs[conn.outName] = {
           x: outputCoords.x,
           y: outputCoords.y

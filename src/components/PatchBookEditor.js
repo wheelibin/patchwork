@@ -1,5 +1,5 @@
 /* globals require */
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -18,7 +18,7 @@ const styles = theme => ({
   }
 });
 
-class PatchBookEditor extends Component {
+class PatchBookEditor extends PureComponent {
   constructor() {
     super();
     this.textAreaRef = React.createRef();

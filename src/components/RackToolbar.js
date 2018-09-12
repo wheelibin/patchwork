@@ -11,6 +11,7 @@ import ZoomOutIcon from "@material-ui/icons/ZoomOut";
 
 import "rc-slider/assets/index.css";
 import Slider from "rc-slider/lib/Slider";
+import { Typography } from "@material-ui/core";
 
 let secondaryColour = "";
 const styles = theme => {
@@ -21,7 +22,9 @@ const styles = theme => {
       overflowY: "hidden"
     },
     appBar: {
-      width: "calc(100% - 18px)"
+      marginLeft: -16,
+      width: "calc(100% + 16px)",
+      backgroundColor: "white"
     },
     sliderContainer: {
       width: 160,
@@ -31,10 +34,13 @@ const styles = theme => {
     slider: {
       width: 100,
       display: "inline-block",
-      margin: "0 7px 0 4px"
+      margin: "0 7px -3px 4px"
     },
     zoomIcons: {
       verticalAlign: "middle"
+    },
+    voicesForm: {
+      marginLeft: 16
     }
   };
 };
@@ -43,7 +49,8 @@ const RackToolbar = ({ classes, zoomLevel, onZoom, patch, onVoiceToggle, display
   return (
     <AppBar position="static" color="default" className={classes.appBar}>
       <Toolbar>
-        <FormGroup row>
+        <Typography variant="title">Voices:</Typography>
+        <FormGroup row className={classes.voicesForm}>
           {patch.voices &&
             patch.voices.map((voice, index) => {
               return (

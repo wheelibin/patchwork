@@ -11,7 +11,7 @@ import moduleDB from "./modules.json";
 
 import * as patch from "./patch";
 import * as patchbook from "./patchbook/patchbook";
-import { Paper, Typography } from "@material-ui/core";
+import { Typography, Snackbar } from "@material-ui/core";
 
 const styles = theme => ({
   app: {
@@ -21,10 +21,18 @@ const styles = theme => ({
   appBar: {
     width: "calc(100% - 12px)"
   },
-  infoText: {
-    marginTop: 12,
-    display: "block",
-    height: 36
+  jackClickInfoTypography: {
+    display: "inline-block",
+    marginRight: 12
+  },
+  jackClickInfo_Module: {
+    color: theme.palette.secondary.light
+  },
+  jackClickInfo_Jack: {
+    color: theme.palette.grey[50]
+  },
+  jackClickInfo_Type: {
+    color: theme.palette.grey[50]
   }
 });
 
@@ -32,21 +40,19 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      markup: patch.mathsBouncingBall,
+      markup: patch.basicKrell,
       patch: {},
       rackContainerWidth: 0,
       moduleHeight: 400,
       displayVoices: [],
-      infoText: ""
+      jackClickedInfo: "",
+      jackClickedInfoOpen: false
     };
   }
   componentDidMount() {
     const patch = patchbook.parse(this.state.markup);
     this.setState({ patch: patchbook.parse(this.state.markup), displayVoices: patch.voices.map(v => v.name) });
   }
-  setRackContainerRef = element => {
-    this.setState({ rackContainerWidth: element.clientWidth });
-  };
   handleMarkupChanged = markup => {
     const parsedPatchbook = patchbook.parse(markup);
     this.setState({ markup: markup, patch: parsedPatchbook });
@@ -62,25 +68,15 @@ class App extends Component {
       this.setState({ displayVoices: this.state.displayVoices.filter(v => v !== value) });
     }
   };
-  // handleJackClick = jack => {
-  //   this.setState({ infoText: `[${jack.type}] ${jack.module}::${jack.jack}` });
-  // };
+  handleJackClick = jack => {
+    this.setState({ jackClickedInfo: jack, jackClickedInfoOpen: true });
+  };
+  handleJackClickedInfoClose = () => {
+    this.setState({ jackClickedInfoOpen: false });
+  };
   render() {
     const { classes } = this.props;
-    let rack = null;
-    if (this.state.rackContainerWidth) {
-      rack = (
-        <Rack
-          patch={this.state.patch}
-          moduleDb={moduleDB}
-          moduleHeight={this.state.moduleHeight}
-          spacing={0}
-          rackWidth={this.state.rackContainerWidth}
-          displayVoices={this.state.displayVoices}
-          // onJackClick={this.handleJackClick}
-        />
-      );
-    }
+
     return (
       <div className={classes.app}>
         <Grid container spacing={24}>
@@ -95,16 +91,37 @@ class App extends Component {
               patch={this.state.patch}
               displayVoices={this.state.displayVoices}
             />
-
-            {/* <Typography className={classes.infoText} variant="caption">
-              {this.state.infoText}
-            </Typography> */}
-
-            <div id="rack-container" ref={this.setRackContainerRef}>
-              {rack}
-            </div>
+            <Rack
+              patch={this.state.patch}
+              moduleDb={moduleDB}
+              moduleHeight={this.state.moduleHeight}
+              spacing={0}
+              rackWidth={this.state.rackContainerWidth}
+              displayVoices={this.state.displayVoices}
+              onJackClick={this.handleJackClick}
+            />
           </Grid>
         </Grid>
+
+        <Snackbar
+          autoHideDuration={2000}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          open={this.state.jackClickedInfoOpen}
+          onClose={this.handleJackClickedInfoClose}
+          message={
+            <span id="app__info-text">
+              <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Module}`} variant="subheading">
+                {this.state.jackClickedInfo.module}
+              </Typography>
+              <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Jack}`} variant="title">
+                {this.state.jackClickedInfo.jack}
+              </Typography>
+              <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Type}`} variant="subheading">
+                ({this.state.jackClickedInfo.type})
+              </Typography>
+            </span>
+          }
+        />
       </div>
     );
   }
