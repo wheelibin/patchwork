@@ -46,7 +46,8 @@ class App extends Component {
       moduleHeight: 400,
       displayVoices: [],
       jackClickedInfo: "",
-      jackClickedInfoOpen: false
+      jackClickedInfoOpen: false,
+      selectedVoiceModulesOnly: false
     };
   }
   componentDidMount() {
@@ -54,8 +55,19 @@ class App extends Component {
     this.setState({ patch: patchbook.parse(this.state.markup), displayVoices: patch.voices.map(v => v.name) });
   }
   handleMarkupChanged = markup => {
-    const parsedPatchbook = patchbook.parse(markup);
-    this.setState({ markup: markup, patch: parsedPatchbook });
+    const newPatch = patchbook.parse(markup);
+
+    const newVoices = newPatch.voices.reduce((result, newPatchVoice) => {
+      if (!this.state.patch.voices.find(v => v.name === newPatchVoice.name)) {
+        result.push(newPatchVoice.name);
+      }
+      return result;
+    }, []);
+
+    const displayVoices = [...this.state.displayVoices];
+    displayVoices.push(...newVoices);
+
+    this.setState({ markup: markup, patch: newPatch, displayVoices: displayVoices });
   };
   handleRackZoom = value => {
     this.setState({ moduleHeight: value });
@@ -74,6 +86,9 @@ class App extends Component {
   handleJackClickedInfoClose = () => {
     this.setState({ jackClickedInfoOpen: false });
   };
+  handleSelectedVoiceModulesOnlyChange = e => {
+    this.setState({ selectedVoiceModulesOnly: e.target.checked });
+  };
   render() {
     const { classes } = this.props;
 
@@ -90,6 +105,8 @@ class App extends Component {
               onVoiceToggle={this.handleVoiceToggle}
               patch={this.state.patch}
               displayVoices={this.state.displayVoices}
+              selectedVoiceModulesOnly={this.state.selectedVoiceModulesOnly}
+              onSelectedVoiceModulesOnlyChange={this.handleSelectedVoiceModulesOnlyChange}
             />
             <Rack
               patch={this.state.patch}
@@ -99,6 +116,7 @@ class App extends Component {
               rackWidth={this.state.rackContainerWidth}
               displayVoices={this.state.displayVoices}
               onJackClick={this.handleJackClick}
+              selectedVoiceModulesOnly={this.state.selectedVoiceModulesOnly}
             />
           </Grid>
         </Grid>

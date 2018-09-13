@@ -20,12 +20,11 @@ class Rack extends PureComponent {
     this.Init();
   }
   componentDidUpdate() {
-    console.log("Rack.componentDidUpdate");
     this.Init();
   }
 
   Init() {
-    const { moduleDb, patch, moduleHeight, spacing, displayVoices } = this.props;
+    const { moduleDb, patch, moduleHeight, spacing, displayVoices, selectedVoiceModulesOnly } = this.props;
 
     const devicePixelRatio = window.devicePixelRatio;
     this.modulesToDisplay = [];
@@ -60,7 +59,8 @@ class Rack extends PureComponent {
         };
         return connectionColours[type];
       },
-      displayVoices: displayVoices
+      displayVoices: displayVoices,
+      selectedVoiceModulesOnly: selectedVoiceModulesOnly
     };
 
     this.renderRack(patch, moduleDb, moduleHeight, devicePixelRatio);
@@ -84,36 +84,65 @@ class Rack extends PureComponent {
     this.canvas.style.height = (this.canvas.height / devicePixelRatio).toString() + "px";
   }
 
+  clearCanvas = () => {
+    this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  };
+
   renderRack = (patch, moduleDb, moduleHeight, devicePixelRatio) => {
     if (!patch.modules || !Object.keys(patch.modules).length) {
       // No patch, so clear canvas and return
-      this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.clearCanvas();
       return;
     }
-    const totalModulesInPatch = Object.keys(patch.modules).length;
-    let imagesLoaded = 0;
-    Object.keys(patch.modules).forEach(moduleName => {
-      let moduleDef = moduleDb.find(m => m.name === moduleName);
 
-      if (!moduleDef) {
-        // Module in patch, but not in db, so create mockup
-        moduleDef = rackFunctions.createMockupModule(patch, moduleName);
-      }
+    window.requestAnimationFrame(() => {
+      let totalModulesInPatch = 0;
+      let imagesLoaded = 0;
 
-      moduleDef.ActualImage = new Image();
-      moduleDef.ActualImage.onload = () => {
-        imagesLoaded += 1;
-        if (imagesLoaded === totalModulesInPatch) {
-          window.requestAnimationFrame(() => {
+      Object.keys(patch.modules).forEach(moduleName => {
+        if (this.config.selectedVoiceModulesOnly && !this.moduleInDisplayVoices(patch, moduleName)) {
+          return;
+        }
+
+        let moduleDef = moduleDb.find(m => m.name === moduleName);
+
+        if (!moduleDef) {
+          // Module in patch, but not in db, so create mockup
+          moduleDef = rackFunctions.createMockupModule(patch, moduleName);
+        }
+
+        moduleDef.ActualImage = new Image();
+        moduleDef.ActualImage.onload = () => {
+          imagesLoaded += 1;
+          if (imagesLoaded === totalModulesInPatch) {
             this.InitCanvas(patch, moduleHeight, devicePixelRatio);
             rackFunctions.drawRack(patch, this.modulesToDisplay, this.canvasContext, this.config);
-          });
-        }
-      };
-      moduleDef.ActualImage.src = moduleDef.image;
+          }
+        };
+        moduleDef.ActualImage.src = moduleDef.image;
 
-      this.modulesToDisplay.push(moduleDef);
+        this.modulesToDisplay.push(moduleDef);
+        totalModulesInPatch += 1;
+      });
+
+      if (totalModulesInPatch === 0) {
+        this.clearCanvas();
+      }
     });
+  };
+  moduleInDisplayVoices = (patch, moduleName) => {
+    // Get a list of modules in the display voices
+    const modulesInDisplayVoices = [];
+    this.config.displayVoices.forEach(dv => {
+      const voices = patch.voices.filter(v => v.name === dv);
+      voices.forEach(voice => {
+        voice.modules.forEach(m => {
+          modulesInDisplayVoices.push(m);
+        });
+      });
+    });
+
+    return modulesInDisplayVoices.find(v => v === moduleName);
   };
   handleCanvasClick = e => {
     const { onJackClick } = this.props;
@@ -183,7 +212,8 @@ Rack.propTypes = {
   spacing: PropTypes.number,
   patch: PropTypes.object.isRequired,
   displayVoices: PropTypes.array.isRequired,
-  onJackClick: PropTypes.func
+  onJackClick: PropTypes.func,
+  selectedVoiceModulesOnly: PropTypes.bool
 };
 
 export default Rack;

@@ -11,7 +11,7 @@ import ZoomOutIcon from "@material-ui/icons/ZoomOut";
 
 import "rc-slider/assets/index.css";
 import Slider from "rc-slider/lib/Slider";
-import { Typography } from "@material-ui/core";
+import { Typography, Switch } from "@material-ui/core";
 
 let secondaryColour = "";
 const styles = theme => {
@@ -45,7 +45,16 @@ const styles = theme => {
   };
 };
 
-const RackToolbar = ({ classes, zoomLevel, onZoom, patch, onVoiceToggle, displayVoices }) => {
+const RackToolbar = ({
+  classes,
+  zoomLevel,
+  onZoom,
+  patch,
+  onVoiceToggle,
+  displayVoices,
+  selectedVoiceModulesOnly,
+  onSelectedVoiceModulesOnlyChange
+}) => {
   return (
     <AppBar position="static" color="default" className={classes.appBar}>
       <Toolbar>
@@ -62,6 +71,12 @@ const RackToolbar = ({ classes, zoomLevel, onZoom, patch, onVoiceToggle, display
                 />
               );
             })}
+        </FormGroup>
+        <FormGroup row>
+          <FormControlLabel
+            control={<Switch checked={selectedVoiceModulesOnly} onChange={onSelectedVoiceModulesOnlyChange} value="selectedVoiceModulesOnly" />}
+            label="Only show modules in selected voice(s)"
+          />
         </FormGroup>
         <div className={classes.sliderContainer}>
           <ZoomOutIcon className={classes.zoomIcons} color="secondary" />
@@ -87,7 +102,9 @@ RackToolbar.propTypes = {
   onZoom: PropTypes.func.isRequired,
   onVoiceToggle: PropTypes.func.isRequired,
   patch: PropTypes.object.isRequired,
-  displayVoices: PropTypes.array.isRequired
+  displayVoices: PropTypes.array.isRequired,
+  selectedVoiceModulesOnly: PropTypes.bool,
+  onSelectedVoiceModulesOnlyChange: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(RackToolbar);
