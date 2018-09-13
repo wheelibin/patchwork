@@ -43,7 +43,7 @@ class App extends Component {
       markup: patch.patch1,
       patch: {},
       rackContainerWidth: 0,
-      moduleHeight: 400,
+      moduleHeight: 255,
       displayVoices: [],
       jackClickedInfo: "",
       jackClickedInfoOpen: false,
