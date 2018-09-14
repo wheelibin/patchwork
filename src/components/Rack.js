@@ -22,7 +22,6 @@ class Rack extends PureComponent {
   componentDidUpdate() {
     this.Init();
   }
-
   Init() {
     const { moduleDb, patch, moduleHeight, spacing, displayVoices, selectedVoiceModulesOnly } = this.props;
 
@@ -33,7 +32,7 @@ class Rack extends PureComponent {
       devicePixelRatio: devicePixelRatio,
       moduleHeight: moduleHeight,
       spacing: spacing,
-      paddingTop: 20,
+      paddingTop: 0,
       jackIndicatorRadius: (moduleHeight / 40) * devicePixelRatio,
       cableWidth: (moduleHeight / 50) * devicePixelRatio,
       // cableSagMin: 150,
@@ -64,24 +63,6 @@ class Rack extends PureComponent {
     };
 
     this.renderRack(patch, moduleDb, moduleHeight, devicePixelRatio);
-  }
-
-  InitCanvas(patch, moduleHeight, devicePixelRatio) {
-    let totalModuleWidth = 0;
-    this.modulesToDisplay.filter(m => m.ActualImage).forEach(m => {
-      const adjustmentRatio = moduleHeight / m.ActualImage.height;
-      totalModuleWidth += m.ActualImage.width * adjustmentRatio;
-    });
-
-    this.canvas.width = totalModuleWidth;
-    this.canvas.height = this.getMaxRow(patch) * moduleHeight + moduleHeight / 2;
-
-    // upscale the canvas content
-    this.canvas.width = this.canvas.width * devicePixelRatio;
-    this.canvas.height = this.canvas.height * devicePixelRatio;
-    // downscale the presentation
-    this.canvas.style.width = (this.canvas.width / devicePixelRatio).toString() + "px";
-    this.canvas.style.height = (this.canvas.height / devicePixelRatio).toString() + "px";
   }
 
   clearCanvas = () => {
@@ -117,6 +98,7 @@ class Rack extends PureComponent {
           if (imagesLoaded === totalModulesInPatch) {
             this.InitCanvas(patch, moduleHeight, devicePixelRatio);
             rackFunctions.drawRack(patch, this.modulesToDisplay, this.canvasContext, this.config);
+            //rackFunctions.cropCanvas(this.canvasContext, this.canvas);
           }
         };
         moduleDef.ActualImage.src = moduleDef.image;
@@ -130,6 +112,34 @@ class Rack extends PureComponent {
       }
     });
   };
+
+  InitCanvas(patch, moduleHeight, devicePixelRatio) {
+    // Calculate the max width of all rows
+    let maxRowWidth = 0;
+    let rowWidths = {};
+    Object.keys(patch.modules).forEach(moduleName => {
+      const rowParam = patch.modules[moduleName].find(p => p.parameter === "RACK_ROW");
+      const row = rowParam ? rowParam.value : 1;
+      if (!rowWidths[row]) {
+        rowWidths[row] = 0;
+      }
+      const m = this.modulesToDisplay.find(m => m.name === moduleName);
+      const adjustmentRatio = moduleHeight / m.ActualImage.height;
+      rowWidths[row] += this.modulesToDisplay.find(m => m.name === moduleName).ActualImage.width * adjustmentRatio;
+      maxRowWidth = Math.max(maxRowWidth, rowWidths[row]);
+    });
+
+    this.canvas.width = maxRowWidth;
+    this.canvas.height = this.getMaxRow(patch) * moduleHeight + moduleHeight / 4;
+
+    // upscale the canvas content
+    this.canvas.width = this.canvas.width * devicePixelRatio;
+    this.canvas.height = this.canvas.height * devicePixelRatio;
+    // downscale the presentation
+    this.canvas.style.width = (this.canvas.width / devicePixelRatio).toString() + "px";
+    this.canvas.style.height = (this.canvas.height / devicePixelRatio).toString() + "px";
+  }
+
   moduleInDisplayVoices = (patch, moduleName) => {
     // Get a list of modules in the display voices
     const modulesInDisplayVoices = [];

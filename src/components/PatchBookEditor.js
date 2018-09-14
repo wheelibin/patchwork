@@ -42,8 +42,11 @@ class PatchBookEditor extends PureComponent {
     }
   };
   render() {
-    const { markup, classes } = this.props;
-    return <textarea className={classes.textField} defaultValue={markup} ref={this.setTextAreaRef} />;
+    if (!this.state.codeMirrorCreated) {
+      const { markup, classes } = this.props;
+      return <textarea className={classes.textField} defaultValue={markup} ref={this.setTextAreaRef} />;
+    }
+    return null;
   }
 }
 

@@ -78,6 +78,48 @@ export const createMockupModule = (patch, moduleName) => {
   return { id: "BLANK", name: moduleName, image: "images/blank_14hp.jpg", inputs: inputs, outputs: outputs, isMockup: true };
 };
 
+export const cropCanvas = (ctx, canvas) => {
+  var w = canvas.width,
+    h = canvas.height,
+    pix = { x: [], y: [] },
+    imageData = ctx.getImageData(0, 0, canvas.width, canvas.height),
+    x,
+    y,
+    index;
+
+  for (y = 0; y < h; y++) {
+    for (x = 0; x < w; x++) {
+      index = (y * w + x) * 4;
+      if (imageData.data[index + 3] > 0) {
+        pix.x.push(x);
+        pix.y.push(y);
+      }
+    }
+  }
+  pix.x.sort(function(a, b) {
+    return a - b;
+  });
+  pix.y.sort(function(a, b) {
+    return a - b;
+  });
+  var n = pix.x.length - 1;
+
+  w = pix.x[n] - pix.x[0];
+  h = pix.y[n] - pix.y[0];
+  var cut = ctx.getImageData(pix.x[0], pix.y[0], w, h);
+
+  canvas.width = w;
+  canvas.height = h;
+  ctx.putImageData(cut, 0, 0);
+
+  // // upscale the canvas content
+  // canvas.width = canvas.width * window.devicePixelRatio;
+  // canvas.height = canvas.height * window.devicePixelRatio;
+  // // downscale the presentation
+  canvas.style.width = (canvas.width / window.devicePixelRatio).toString() + "px";
+  canvas.style.height = (canvas.height / window.devicePixelRatio).toString() + "px";
+};
+
 const drawJackIndicator = (ctx, x, y, fillColour, lineColour, devicePixelRatio, config) => {
   ctx.beginPath();
   ctx.arc(x, y, config.jackIndicatorRadius, 0, 2 * Math.PI, false);
@@ -164,12 +206,10 @@ const drawConnection = (ctx, output, input, outModule, inModule, type, devicePix
   ctx.beginPath();
   ctx.moveTo(jackFrom.x, jackFrom.y);
 
-  ctx.quadraticCurveTo(
-    jackFrom.x + (jackTo.x - jackFrom.x) / 2,
-    jackFrom.y + (jackTo.y - jackFrom.y) / 2 + getRandomCableSag(config),
-    jackTo.x,
-    jackTo.y
-  );
+  const shortCableSag = 75;
+  const cableSag = Math.abs(jackTo.y - jackFrom.y) < 100 ? shortCableSag : getRandomCableSag(config);
+
+  ctx.quadraticCurveTo(jackFrom.x + (jackTo.x - jackFrom.x) / 2, jackFrom.y + (jackTo.y - jackFrom.y) / 2 + cableSag, jackTo.x, jackTo.y);
   ctx.lineWidth = config.cableWidth;
   ctx.strokeStyle = connectionColour;
   ctx.stroke();
