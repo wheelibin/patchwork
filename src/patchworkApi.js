@@ -8,6 +8,6 @@ export const getPatch = async id => {
   return await response.text();
 };
 
-const timeout = ms => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
+// const timeout = ms => {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// };

@@ -23,7 +23,7 @@ class Rack extends PureComponent {
     this.Init();
   }
   Init() {
-    const { moduleDb, patch, moduleHeight, spacing, displayVoices, selectedVoiceModulesOnly } = this.props;
+    const { moduleDb, patch, moduleHeight, spacing, displayVoices, selectedVoiceModulesOnly, highlightJack } = this.props;
 
     const devicePixelRatio = window.devicePixelRatio;
     this.modulesToDisplay = [];
@@ -59,7 +59,8 @@ class Rack extends PureComponent {
         return connectionColours[type];
       },
       displayVoices: displayVoices,
-      selectedVoiceModulesOnly: selectedVoiceModulesOnly
+      selectedVoiceModulesOnly: selectedVoiceModulesOnly,
+      highlightJack: highlightJack
     };
 
     this.renderRack(patch, moduleDb, moduleHeight, devicePixelRatio);
@@ -223,7 +224,8 @@ Rack.propTypes = {
   patch: PropTypes.object.isRequired,
   displayVoices: PropTypes.array.isRequired,
   onJackClick: PropTypes.func,
-  selectedVoiceModulesOnly: PropTypes.bool
+  selectedVoiceModulesOnly: PropTypes.bool,
+  highlightJack: PropTypes.object
 };
 
 export default Rack;

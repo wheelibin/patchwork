@@ -1,3 +1,4 @@
+/* globals setTimeout clearTimeout */
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import Grid from "@material-ui/core/Grid";
@@ -14,6 +15,9 @@ import * as patchworkApi from "../patchworkApi";
 import * as patches from "../patch";
 import * as patchbook from "../patchbook/patchbook";
 import { Typography, Snackbar } from "@material-ui/core";
+
+const jackInfoDuration = 2000;
+let jackHighlightTimeout;
 
 const styles = theme => ({
   app: {
@@ -98,7 +102,11 @@ class Patchwork extends Component {
     }
   };
   handleJackClick = jack => {
-    this.setState({ jackClickedInfo: jack, jackClickedInfoOpen: true });
+    this.setState({ jackClickedInfo: jack, jackClickedInfoOpen: true, highlightJack: jack });
+    clearTimeout(jackHighlightTimeout);
+    jackHighlightTimeout = setTimeout(() => {
+      this.setState({ highlightJack: null });
+    }, jackInfoDuration);
   };
   handleJackClickedInfoClose = () => {
     this.setState({ jackClickedInfoOpen: false });
@@ -140,13 +148,14 @@ class Patchwork extends Component {
                   displayVoices={this.state.displayVoices}
                   onJackClick={this.handleJackClick}
                   selectedVoiceModulesOnly={this.state.selectedVoiceModulesOnly}
+                  highlightJack={this.state.highlightJack}
                 />
               </div>
             </Grid>
           </Grid>
 
           <Snackbar
-            autoHideDuration={2000}
+            autoHideDuration={jackInfoDuration}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
             open={this.state.jackClickedInfoOpen}
             onClose={this.handleJackClickedInfoClose}

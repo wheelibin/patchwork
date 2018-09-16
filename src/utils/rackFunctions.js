@@ -35,7 +35,15 @@ export const drawRack = (patch, modulesToDisplay, canvasContext, config) => {
           let output = mOut.outputs[conn.outName];
           let input = mIn.inputs[conn.inName];
 
-          drawConnection(canvasContext, output, input, mOut, mIn, conn.connectionType, config.devicePixelRatio, config);
+          let highlightConnection = null;
+
+          if (config.highlightJack) {
+            highlightConnection =
+              (conn.outModule === config.highlightJack.module && conn.outName === config.highlightJack.jack) ||
+              (conn.inModule === config.highlightJack.module && conn.inName === config.highlightJack.jack);
+          }
+
+          drawConnection(canvasContext, output, input, mOut, mIn, conn.connectionType, config.devicePixelRatio, config, highlightConnection);
         }
       });
     }
@@ -192,7 +200,7 @@ const drawModule = (moduleDef, canvasContext, config) => {
   }
 };
 
-const drawConnection = (ctx, output, input, outModule, inModule, type, devicePixelRatio, config) => {
+const drawConnection = (ctx, output, input, outModule, inModule, type, devicePixelRatio, config, highlightConnection) => {
   const jackFrom = {
     x: output ? devicePixelRatio * (output.x * outModule.sizeAdjustmentRatio + outModule.offset.x) : 0,
     y: output ? devicePixelRatio * (output.y * outModule.sizeAdjustmentRatio + outModule.offset.y) : 0
@@ -201,7 +209,13 @@ const drawConnection = (ctx, output, input, outModule, inModule, type, devicePix
     x: input ? devicePixelRatio * (input.x * inModule.sizeAdjustmentRatio + inModule.offset.x) : 0,
     y: input ? devicePixelRatio * (input.y * inModule.sizeAdjustmentRatio + inModule.offset.y) : 0
   };
-  const connectionColour = config.getConnectionColour(type, 0.75);
+
+  let cableAlpha = 0.75;
+  if (highlightConnection != null) {
+    cableAlpha = highlightConnection ? 1 : 0.25;
+  }
+
+  const connectionColour = config.getConnectionColour(type, cableAlpha);
 
   ctx.beginPath();
   ctx.moveTo(jackFrom.x, jackFrom.y);
