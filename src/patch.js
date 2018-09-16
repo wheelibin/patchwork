@@ -127,3 +127,5 @@ export const basicKrell = `Basic Krell:
 * VCO:
 
 * VCA:`;
+
+export const example = ``;

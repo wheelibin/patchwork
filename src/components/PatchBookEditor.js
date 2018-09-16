@@ -25,6 +25,11 @@ class PatchBookEditor extends PureComponent {
     this.state = { codeMirrorCreated: false };
     this.codeMirror = null;
   }
+  // componentWillReceiveProps(nextProps) {
+  //   if (this.props.markup !== nextProps.markup) {
+  //     this.codeMirror.setValue(nextProps.markup);
+  //   }
+  // }
   setTextAreaRef = element => {
     if (!this.state.codeMirrorCreated) {
       CodeMirror.defineSimpleMode("patchbook", PatchBookMode);
@@ -42,8 +47,8 @@ class PatchBookEditor extends PureComponent {
     }
   };
   render() {
+    const { markup, classes } = this.props;
     if (!this.state.codeMirrorCreated) {
-      const { markup, classes } = this.props;
       return <textarea className={classes.textField} defaultValue={markup} ref={this.setTextAreaRef} />;
     }
     return null;

@@ -206,8 +206,8 @@ const drawConnection = (ctx, output, input, outModule, inModule, type, devicePix
   ctx.beginPath();
   ctx.moveTo(jackFrom.x, jackFrom.y);
 
-  const shortCableSag = 75;
-  const cableSag = Math.abs(jackTo.y - jackFrom.y) < 100 ? shortCableSag : getRandomCableSag(config);
+  const shortCableSag = 150;
+  const cableSag = Math.abs(jackTo.y - jackFrom.y) < 50 ? shortCableSag : getRandomCableSag(config);
 
   ctx.quadraticCurveTo(jackFrom.x + (jackTo.x - jackFrom.x) / 2, jackFrom.y + (jackTo.y - jackFrom.y) / 2 + cableSag, jackTo.x, jackTo.y);
   ctx.lineWidth = config.cableWidth;

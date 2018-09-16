@@ -37,8 +37,8 @@ class Rack extends PureComponent {
       cableWidth: (moduleHeight / 50) * devicePixelRatio,
       // cableSagMin: 150,
       // cableSagMax: moduleHeight + moduleHeight / 3,
-      cableSagMin: moduleHeight / 1.2,
-      cableSagMax: moduleHeight / 1.2,
+      cableSagMin: moduleHeight,
+      cableSagMax: moduleHeight,
       inputJackColours: {
         fill: "rgba(178, 242, 0, 0.3)",
         border: "rgba(178, 242, 0, 0.5)"
