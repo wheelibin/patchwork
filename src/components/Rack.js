@@ -27,6 +27,7 @@ class Rack extends PureComponent {
 
     const devicePixelRatio = window.devicePixelRatio;
     this.modulesToDisplay = [];
+    this.patch = patch;
 
     this.config = {
       devicePixelRatio: devicePixelRatio,
@@ -119,6 +120,9 @@ class Rack extends PureComponent {
     let maxRowWidth = 0;
     let rowWidths = {};
     Object.keys(patch.modules).forEach(moduleName => {
+      if (this.config.selectedVoiceModulesOnly && !this.moduleInDisplayVoices(patch, moduleName)) {
+        return;
+      }
       const rowParam = patch.modules[moduleName].find(p => p.parameter === "RACK_ROW");
       const row = rowParam ? rowParam.value : 1;
       if (!rowWidths[row]) {

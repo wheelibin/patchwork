@@ -36,7 +36,6 @@ export const drawRack = (patch, modulesToDisplay, canvasContext, config) => {
           let input = mIn.inputs[conn.inName];
 
           let highlightConnection = null;
-
           if (config.highlightJack) {
             highlightConnection =
               (conn.outModule === config.highlightJack.module && conn.outName === config.highlightJack.jack) ||
