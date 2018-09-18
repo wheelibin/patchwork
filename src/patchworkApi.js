@@ -1,7 +1,6 @@
-/* globals fetch */
+/* globals fetch process */
 
-//const baseServerUrl = "https://wheelibin-patchwork.herokuapp.com";
-const baseServerUrl = "";
+const baseServerUrl = process.env.REACT_APP_PATCHWORK_SERVER_BASE_URL;
 
 export const getPatch = async id => {
   //await timeout(4000);
