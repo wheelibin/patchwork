@@ -56,8 +56,14 @@ class Rack extends PureComponent {
           Gate: `rgba(178, 242, 0, ${alpha})`,
           Trigger: `rgba(0, 133, 164, ${alpha})`,
           Clock: `rgba(243, 0, 33, ${alpha})`
+          // CV: `rgba(255, 252, 0, ${alpha})`,
+          // Audio: `rgba(169, 249, 0, ${alpha})`,
+          // Pitch: `rgba(1, 208, 218, ${alpha})`,
+          // Gate: `rgba(255, 118, 0, ${alpha})`,
+          // Trigger: `rgba(236, 0, 140, ${alpha})`,
+          // Clock: `rgba(142, 13, 224, ${alpha})`
         };
-        return connectionColours[type];
+        return connectionColours[type] || `rgba(255,255,255, ${alpha}`;
       },
       displayVoices: displayVoices,
       selectedVoiceModulesOnly: selectedVoiceModulesOnly,

@@ -8,10 +8,11 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import ZoomInIcon from "@material-ui/icons/ZoomIn";
 import ZoomOutIcon from "@material-ui/icons/ZoomOut";
+import ShareIcon from "@material-ui/icons/Share";
 
 import "rc-slider/assets/index.css";
 import Slider from "rc-slider/lib/Slider";
-import { Typography, Switch } from "@material-ui/core";
+import { Typography, Switch, Button } from "@material-ui/core";
 
 let secondaryColour = "";
 const styles = theme => {
@@ -26,7 +27,7 @@ const styles = theme => {
       width: "calc(100% + 16px)",
       backgroundColor: "white"
     },
-    sliderContainer: {
+    shareContainer: {
       width: 160,
       position: "absolute",
       right: 24
@@ -53,7 +54,8 @@ const RackToolbar = ({
   onVoiceToggle,
   displayVoices,
   selectedVoiceModulesOnly,
-  onSelectedVoiceModulesOnlyChange
+  onSelectedVoiceModulesOnlyChange,
+  onShare
 }) => {
   return (
     <AppBar position="static" color="default" className={classes.appBar}>
@@ -78,7 +80,8 @@ const RackToolbar = ({
             label="Only show modules in selected voice(s)"
           />
         </FormGroup>
-        <div className={classes.sliderContainer}>
+
+        <div>
           <ZoomOutIcon className={classes.zoomIcons} color="secondary" />
           <Slider
             handleStyle={{ borderColor: secondaryColour }}
@@ -91,6 +94,10 @@ const RackToolbar = ({
           />
           <ZoomInIcon className={classes.zoomIcons} color="secondary" />
         </div>
+        <Button onClick={onShare} color="secondary" variant="outlined" className={classes.shareContainer}>
+          Share
+          <ShareIcon />
+        </Button>
       </Toolbar>
     </AppBar>
   );
@@ -104,7 +111,8 @@ RackToolbar.propTypes = {
   patch: PropTypes.object.isRequired,
   displayVoices: PropTypes.array.isRequired,
   selectedVoiceModulesOnly: PropTypes.bool,
-  onSelectedVoiceModulesOnlyChange: PropTypes.func.isRequired
+  onSelectedVoiceModulesOnlyChange: PropTypes.func.isRequired,
+  onShare: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(RackToolbar);

@@ -209,7 +209,7 @@ const drawConnection = (ctx, output, input, outModule, inModule, type, devicePix
     y: input ? devicePixelRatio * (input.y * inModule.sizeAdjustmentRatio + inModule.offset.y) : 0
   };
 
-  let cableAlpha = 0.75;
+  let cableAlpha = 0.8;
   if (highlightConnection != null) {
     cableAlpha = highlightConnection ? 1 : 0.25;
   }

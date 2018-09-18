@@ -1,9 +1,10 @@
-/* globals setTimeout clearTimeout */
+/* globals setTimeout clearTimeout document */
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 
+import { homepage } from "../../package.json";
 import "./Patchwork.css";
 import Rack from "./Rack";
 import PatchBookEditor from "./PatchBookEditor";
@@ -11,6 +12,7 @@ import RackToolbar from "./RackToolbar";
 import Loading from "./Loading";
 import moduleDB from "../modules.json";
 import * as patchworkApi from "../patchworkApi";
+import ShareDialog from "./ShareDialog";
 
 import * as patches from "../patch";
 import * as patchbook from "../patchbook/patchbook";
@@ -60,8 +62,11 @@ class Patchwork extends Component {
       displayVoices: [],
       jackClickedInfo: "",
       jackClickedInfoOpen: false,
-      selectedVoiceModulesOnly: false
+      selectedVoiceModulesOnly: false,
+      shareDialogOpen: false,
+      shareUrl: ""
     };
+    this.shareDialogInputRef = React.createRef();
   }
   async componentDidMount() {
     this.setState({ loading: true });
@@ -69,7 +74,7 @@ class Patchwork extends Component {
     const patchId = this.props.match.params.patchid;
     let patchMarkup = patches.patch1;
     if (patchId) {
-      patchMarkup = await patchworkApi.getPatch(patchId);
+      patchMarkup = (await patchworkApi.getPatch(patchId)) || patchMarkup;
     }
 
     const patch = patchMarkup && patchMarkup.length ? patchbook.parse(patchMarkup) : "";
@@ -88,7 +93,7 @@ class Patchwork extends Component {
     const displayVoices = [...this.state.displayVoices];
     displayVoices.push(...newVoices);
 
-    this.setState({ patch: newPatch, displayVoices: displayVoices });
+    this.setState({ patch: newPatch, displayVoices: displayVoices, markup: markup });
   };
   handleRackZoom = value => {
     this.setState({ moduleHeight: value });
@@ -114,6 +119,18 @@ class Patchwork extends Component {
   handleSelectedVoiceModulesOnlyChange = e => {
     this.setState({ selectedVoiceModulesOnly: e.target.checked });
   };
+  handleShare = async () => {
+    const savedPatch = await patchworkApi.savePatch(this.state.markup);
+    const patch = JSON.parse(savedPatch);
+    this.setState({ shareDialogOpen: true, shareUrl: `${homepage}/${patch._id}` });
+  };
+  handleShareDialogClose = () => {
+    this.setState({ shareDialogOpen: false });
+  };
+  handleShareDialogCopy = () => {
+    this.shareDialogInputRef.current.select();
+    document.execCommand("copy");
+  };
   render() {
     const { classes } = this.props;
 
@@ -137,6 +154,7 @@ class Patchwork extends Component {
                 displayVoices={this.state.displayVoices}
                 selectedVoiceModulesOnly={this.state.selectedVoiceModulesOnly}
                 onSelectedVoiceModulesOnlyChange={this.handleSelectedVoiceModulesOnlyChange}
+                onShare={this.handleShare}
               />
               <div className={classes.rackContainer}>
                 <Rack
@@ -172,6 +190,13 @@ class Patchwork extends Component {
                 </Typography>
               </span>
             }
+          />
+          <ShareDialog
+            url={this.state.shareUrl}
+            open={this.state.shareDialogOpen}
+            onClose={this.handleShareDialogClose}
+            onCopy={this.handleShareDialogCopy}
+            inputRef={this.shareDialogInputRef}
           />
         </div>
       );
