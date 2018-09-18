@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
+import ErrorIcon from "@material-ui/icons/Error";
 
 import { homepage } from "../../package.json";
 import "./Patchwork.css";
@@ -16,9 +17,9 @@ import ShareDialog from "./ShareDialog";
 
 import * as patches from "../patch";
 import * as patchbook from "../patchbook/patchbook";
-import { Typography, Snackbar } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
+import Alert from "./Alert";
 
-const jackInfoDuration = 2000;
 let jackHighlightTimeout;
 
 const styles = theme => ({
@@ -48,6 +49,15 @@ const styles = theme => ({
   editorContainer: {
     height: "100vh",
     backgroundColor: "#272822"
+  },
+  alertErrorText: {
+    color: theme.palette.grey[50],
+    display: "inline-block",
+    verticalAlign: "top",
+    marginLeft: 16
+  },
+  alertErrorIcon: {
+    color: theme.palette.secondary.light
   }
 });
 
@@ -61,26 +71,48 @@ class Patchwork extends Component {
       moduleHeight: 300,
       displayVoices: [],
       jackClickedInfo: "",
-      jackClickedInfoOpen: false,
       selectedVoiceModulesOnly: false,
       shareDialogOpen: false,
-      shareUrl: ""
+      shareUrl: "",
+      alertOpen: false,
+      alertShowDuration: 2000,
+      alertContent: null
     };
     this.shareDialogInputRef = React.createRef();
   }
   async componentDidMount() {
+    const { match } = this.props;
     this.setState({ loading: true });
 
-    const patchId = this.props.match.params.patchid;
+    const patchId = match.params.patchid;
     let patchMarkup = patches.patch1;
     if (patchId) {
-      patchMarkup = (await patchworkApi.getPatch(patchId)) || patchMarkup;
+      const fetchedMarkup = await patchworkApi.getPatch(patchId);
+      patchMarkup = fetchedMarkup || patchMarkup;
+      if (!fetchedMarkup) {
+        this.showError("Requested patch not found", 5000);
+      }
     }
 
     const patch = patchMarkup && patchMarkup.length ? patchbook.parse(patchMarkup) : "";
     const displayVoices = patch.voices ? patch.voices.map(v => v.name) : [];
     this.setState({ markup: patchMarkup, patch: patch, displayVoices: displayVoices, loading: false });
   }
+  showError = (alert, showDuration) => {
+    const { classes } = this.props;
+    this.setState({
+      alertOpen: true,
+      alertShowDuration: showDuration,
+      alertContent: (
+        <span>
+          <ErrorIcon className={classes.alertErrorIcon} />
+          <Typography variant="subheading" className={classes.alertErrorText}>
+            {alert}
+          </Typography>
+        </span>
+      )
+    });
+  };
   handleMarkupChanged = markup => {
     const newPatch = patchbook.parse(markup);
     const newVoices = newPatch.voices.reduce((result, newPatchVoice) => {
@@ -107,14 +139,31 @@ class Patchwork extends Component {
     }
   };
   handleJackClick = jack => {
-    this.setState({ jackClickedInfo: jack, jackClickedInfoOpen: true, highlightJack: jack });
-    clearTimeout(jackHighlightTimeout);
-    jackHighlightTimeout = setTimeout(() => {
-      this.setState({ highlightJack: null });
-    }, jackInfoDuration);
+    const { classes } = this.props;
+
+    this.setState({ jackClickedInfo: jack }, () => {
+      const jackInfo = (
+        <span id="app__info-text">
+          <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Module}`} variant="subheading">
+            {this.state.jackClickedInfo.module}
+          </Typography>
+          <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Jack}`} variant="title">
+            {this.state.jackClickedInfo.jack}
+          </Typography>
+          <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Type}`} variant="subheading">
+            ({this.state.jackClickedInfo.type})
+          </Typography>
+        </span>
+      );
+      this.setState({ alertContent: jackInfo, alertOpen: true, highlightJack: jack });
+      clearTimeout(jackHighlightTimeout);
+      jackHighlightTimeout = setTimeout(() => {
+        this.setState({ highlightJack: null });
+      }, this.state.alertShowDuration);
+    });
   };
-  handleJackClickedInfoClose = () => {
-    this.setState({ jackClickedInfoOpen: false });
+  handleAlertClose = () => {
+    this.setState({ alertOpen: false });
   };
   handleSelectedVoiceModulesOnlyChange = e => {
     this.setState({ selectedVoiceModulesOnly: e.target.checked });
@@ -172,25 +221,13 @@ class Patchwork extends Component {
             </Grid>
           </Grid>
 
-          <Snackbar
-            autoHideDuration={jackInfoDuration}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            open={this.state.jackClickedInfoOpen}
-            onClose={this.handleJackClickedInfoClose}
-            message={
-              <span id="app__info-text">
-                <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Module}`} variant="subheading">
-                  {this.state.jackClickedInfo.module}
-                </Typography>
-                <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Jack}`} variant="title">
-                  {this.state.jackClickedInfo.jack}
-                </Typography>
-                <Typography className={`${classes.jackClickInfoTypography} ${classes.jackClickInfo_Type}`} variant="subheading">
-                  ({this.state.jackClickedInfo.type})
-                </Typography>
-              </span>
-            }
+          <Alert
+            open={this.state.alertOpen}
+            onClose={this.handleAlertClose}
+            hideAfter={this.state.alertShowDuration}
+            content={this.state.alertContent}
           />
+
           <ShareDialog
             url={this.state.shareUrl}
             open={this.state.shareDialogOpen}
