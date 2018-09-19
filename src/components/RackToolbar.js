@@ -55,7 +55,8 @@ const RackToolbar = ({
   displayVoices,
   selectedVoiceModulesOnly,
   onSelectedVoiceModulesOnlyChange,
-  onShare
+  onShare,
+  shareEnabled
 }) => {
   return (
     <AppBar position="static" color="default" className={classes.appBar}>
@@ -94,7 +95,7 @@ const RackToolbar = ({
           />
           <ZoomInIcon className={classes.zoomIcons} color="secondary" />
         </div>
-        <Button onClick={onShare} color="secondary" variant="outlined" className={classes.shareContainer}>
+        <Button onClick={onShare} color="secondary" variant="outlined" disabled={!shareEnabled} className={classes.shareContainer}>
           Share
           <ShareIcon />
         </Button>
@@ -112,7 +113,8 @@ RackToolbar.propTypes = {
   displayVoices: PropTypes.array.isRequired,
   selectedVoiceModulesOnly: PropTypes.bool,
   onSelectedVoiceModulesOnlyChange: PropTypes.func.isRequired,
-  onShare: PropTypes.func.isRequired
+  onShare: PropTypes.func.isRequired,
+  shareEnabled: PropTypes.bool
 };
 
 export default withStyles(styles)(RackToolbar);

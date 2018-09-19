@@ -74,6 +74,7 @@ class Patchwork extends Component {
       displayVoices: [],
       jackClickedInfo: "",
       selectedVoiceModulesOnly: false,
+      shareEnabled: false,
       shareDialogOpen: false,
       shareUrl: "",
       alertOpen: false,
@@ -104,8 +105,11 @@ class Patchwork extends Component {
 
     const patch = patchMarkup && patchMarkup.length ? patchbook.parse(patchMarkup) : "";
     const displayVoices = patch.voices ? patch.voices.map(v => v.name) : [];
-    this.setState({ markup: patchMarkup, patch: patch, displayVoices: displayVoices, loading: false });
+    this.setState({ markup: patchMarkup, patch: patch, displayVoices: displayVoices, loading: false, shareEnabled: this.isValidPatch(patch) });
   }
+  isValidPatch = patch => {
+    return patch.voices.length > 0 && Object.keys(patch.modules).length > 0;
+  };
   showError = (alert, showDuration) => {
     const { classes } = this.props;
     this.setState({
@@ -133,7 +137,7 @@ class Patchwork extends Component {
     const displayVoices = [...this.state.displayVoices];
     displayVoices.push(...newVoices);
 
-    this.setState({ patch: newPatch, displayVoices: displayVoices, markup: markup });
+    this.setState({ patch: newPatch, displayVoices: displayVoices, markup: markup, shareEnabled: this.isValidPatch(newPatch) });
   };
   handleRackZoom = value => {
     this.setState({ moduleHeight: value });
@@ -216,6 +220,7 @@ class Patchwork extends Component {
                 selectedVoiceModulesOnly={this.state.selectedVoiceModulesOnly}
                 onSelectedVoiceModulesOnlyChange={this.handleSelectedVoiceModulesOnlyChange}
                 onShare={this.handleShare}
+                shareEnabled={this.state.shareEnabled}
               />
               <div className={classes.rackContainer}>
                 <Rack
