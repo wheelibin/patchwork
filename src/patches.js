@@ -1,6 +1,6 @@
-export const patch1 = `// ++++++ //
+export const patch1 = `// ------ //
 // VOICES //
-// ++++++ //
+// ------ //
 
 // Bangin' techno shit
 DRUMS: 
@@ -13,7 +13,7 @@ DRUMS:
   - Maths (Ch3) >> BIA (Attack)  
   - Mother-32 (NOISE) -> Quad VCA (IN 2)
 
-// Gnarly acid bass
+// Bass line
 VOICE 1:	
   - ADE-32 (OUT:2) p> Mother-32 (VCO 1V/OCT)  
   - ADE-32 (OUT:4) t> Maths (Ch4 TRIG)  
@@ -28,12 +28,14 @@ VOICE 1:
   - Quad VCA (4/MIX) -> AUDIO INTERFACE (Ch2)
 
 
-// +++++++++++++++++ //
+// ----------------- //
 // MODULE PARAMETERS //
-// +++++++++++++++++ //
+// ----------------- //
+
 * Mother-32:
-  // Patchwork RACK_ROW option
+  // You can control the row using this special parameter
   | RACK_ROW = 1 
+  // Standard module params...
   | Pulse Width = 1
   | VCO Mod Amount = 2.1
   | Cutoff = 4
@@ -128,4 +130,49 @@ export const basicKrell = `Basic Krell:
 
 * VCA:`;
 
-export const example = ``;
+export const example = `// Patches should be defined using the PatchBook markup language 
+// All credit to Spektro Audio :) 
+// https://github.com/SpektroAudio/Patchbook
+
+// -------------
+// Example Patch
+// -------------
+
+// Voices
+// ------
+
+// A voice using only mockup modules
+Voice 1:
+	- Clock (OUT) c> Sequencer (CLK)
+	- Sequencer (Gate) g> EG (Trigger)
+	- Sequencer (Pitch) p> VCO (1V/OCT)
+	- EG (Env) >> VCA (CV)
+	- VCO (Saw Out) -> VCA (IN)
+	- VCA (OUT) -> AUDIO INTERFACE (CH1)
+
+// PatchWork also knows about some real modules :)
+// Here's the Maths Bouncing Ball patch
+Bouncing Ball:
+	- Clock (OUT) c> Maths (Ch1 TRIG)
+	- Maths (Ch1) >> Maths (Ch4 BOTH) 
+	- Maths (Ch1 EOR) t> Maths (Ch4 CYCLE)
+	- Maths (Ch4) >> VCA (CV)
+
+
+// Module Parameters
+// -----------------
+
+// Modules will be drawn in the order they are defined here
+// If a module is not defined in this parameter section, then it will be drawn
+// at the position it appears in the actual patch above
+
+* Maths: 
+	// You can control the row using this special parameter
+	| RACK_ROW = 2
+	// Standard module params...
+	| Ch1 RISE = Full CCW
+	| Ch1 FALL = 3:00
+	| Ch1 Response = Linear
+	| Ch4 RISE = Full CCW
+	| Ch4 FALL = 11:00
+	| Ch4 Response = Linear`;

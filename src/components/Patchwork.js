@@ -15,7 +15,7 @@ import moduleDB from "../modules.json";
 import * as patchworkApi from "../patchworkApi";
 import ShareDialog from "./ShareDialog";
 
-import * as patches from "../patch";
+import * as patches from "../patches";
 import * as patchbook from "../patchbook/patchbook";
 import { Typography } from "@material-ui/core";
 import Alert from "./Alert";
@@ -54,10 +54,12 @@ const styles = theme => ({
     color: theme.palette.grey[50],
     display: "inline-block",
     verticalAlign: "top",
-    marginLeft: 16
+    marginLeft: 16,
+    marginTop: 3
   },
   alertErrorIcon: {
-    color: theme.palette.secondary.light
+    color: theme.palette.secondary.light,
+    marginTop: 2
   }
 });
 
@@ -86,12 +88,18 @@ class Patchwork extends Component {
 
     const patchId = match.params.patchid;
     let patchMarkup = patches.patch1;
+    let fetchedMarkup;
     if (patchId) {
-      const fetchedMarkup = await patchworkApi.getPatch(patchId);
-      patchMarkup = fetchedMarkup || patchMarkup;
-      if (!fetchedMarkup) {
-        this.showError("Requested patch not found", 5000);
+      try {
+        fetchedMarkup = await patchworkApi.getPatch(patchId);
+        if (!fetchedMarkup) {
+          this.showError("Requested patch not found", 5000);
+        }
+      } catch (error) {
+        this.showError("Error retrieving saved patch, the server may be down", 5000);
       }
+
+      patchMarkup = fetchedMarkup || patchMarkup;
     }
 
     const patch = patchMarkup && patchMarkup.length ? patchbook.parse(patchMarkup) : "";
@@ -169,9 +177,13 @@ class Patchwork extends Component {
     this.setState({ selectedVoiceModulesOnly: e.target.checked });
   };
   handleShare = async () => {
-    const savedPatch = await patchworkApi.savePatch(this.state.markup);
-    const patch = JSON.parse(savedPatch);
-    this.setState({ shareDialogOpen: true, shareUrl: `${homepage}/${patch._id}` });
+    try {
+      const savedPatch = await patchworkApi.savePatch(this.state.markup);
+      const patch = JSON.parse(savedPatch);
+      this.setState({ shareDialogOpen: true, shareUrl: `${homepage}/${patch._id}` });
+    } catch (error) {
+      this.showError("Error saving patch, the server may be down", 5000);
+    }
   };
   handleShareDialogClose = () => {
     this.setState({ shareDialogOpen: false });
