@@ -166,6 +166,9 @@ Bouncing Ball:
 // If a module is not defined in this parameter section, then it will be drawn
 // at the position it appears in the actual patch above
 
+* ADE-32:
+  | RACK_ROW = 2
+  
 * Maths: 
 	// You can control the row using this special parameter
 	| RACK_ROW = 2
@@ -176,9 +179,6 @@ Bouncing Ball:
 	| Ch4 RISE = Full CCW
 	| Ch4 FALL = 11:00
   | Ch4 Response = Linear
-
-* ADE-32:
-	| RACK_ROW = 2
 
 * Quad VCA:
 	| RACK_ROW = 2`;
