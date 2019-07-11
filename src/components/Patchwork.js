@@ -73,7 +73,7 @@ class Patchwork extends Component {
       moduleHeight: 300,
       displayVoices: [],
       jackClickedInfo: "",
-      selectedVoiceModulesOnly: false,
+      selectedVoiceModulesOnly: true,
       shareEnabled: false,
       shareDialogOpen: false,
       shareUrl: "",
@@ -88,7 +88,7 @@ class Patchwork extends Component {
     this.setState({ loading: true });
 
     const patchId = match.params.patchid;
-    let patchMarkup = patches.patch1;
+    let patchMarkup = patches.example;
     let fetchedMarkup;
     if (patchId) {
       try {

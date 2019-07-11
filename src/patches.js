@@ -141,7 +141,7 @@ export const example = `// Patches should be defined using the PatchBook markup 
 // Voices
 // ------
 
-// A voice using only mockup modules
+// A voice 
 Voice 1:
 	- Clock (OUT) c> Sequencer (CLK)
 	- Sequencer (Gate) g> EG (Trigger)
@@ -153,10 +153,10 @@ Voice 1:
 // PatchWork also knows about some real modules :)
 // Here's the Maths Bouncing Ball patch
 Bouncing Ball:
-	- Clock (OUT) c> Maths (Ch1 TRIG)
+	- ADE-32 (OUT:1) t> Maths (Ch1 TRIG)
 	- Maths (Ch1) >> Maths (Ch4 BOTH) 
 	- Maths (Ch1 EOR) t> Maths (Ch4 CYCLE)
-	- Maths (Ch4) >> VCA (CV)
+	- Maths (Ch4) >> Quad VCA (CV 1)
 
 
 // Module Parameters
@@ -175,4 +175,10 @@ Bouncing Ball:
 	| Ch1 Response = Linear
 	| Ch4 RISE = Full CCW
 	| Ch4 FALL = 11:00
-	| Ch4 Response = Linear`;
+  | Ch4 Response = Linear
+
+* ADE-32:
+	| RACK_ROW = 2
+
+* Quad VCA:
+	| RACK_ROW = 2`;
