@@ -141,7 +141,7 @@ class Rack extends PureComponent {
     });
 
     this.canvas.width = maxRowWidth;
-    this.canvas.height = this.getMaxRow(patch) * moduleHeight + moduleHeight / 4;
+    this.canvas.height = this.getMaxRow(patch) * moduleHeight + moduleHeight / 2;
 
     // upscale the canvas content
     this.canvas.width = this.canvas.width * devicePixelRatio;

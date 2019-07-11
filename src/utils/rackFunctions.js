@@ -1,3 +1,5 @@
+/* globals window */
+
 export const drawRack = (patch, modulesToDisplay, canvasContext, config) => {
   const moduleRows = {};
   Object.keys(patch.modules).forEach(moduleName => {
