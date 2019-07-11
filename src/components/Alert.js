@@ -12,7 +12,7 @@ Alert.propTypes = {
   hideAfter: PropTypes.number.isRequired,
   open: PropTypes.bool,
   onClose: PropTypes.func.isRequired,
-  content: PropTypes.string.isRequired
+  content: PropTypes.string
 };
 
 export default Alert;
