@@ -1,6 +1,17 @@
 {
-  "main.css": "static/css/main.00b26f9f.css",
-  "main.css.map": "static/css/main.00b26f9f.css.map",
-  "main.js": "static/js/main.47bc340a.js",
-  "main.js.map": "static/js/main.47bc340a.js.map"
+  "files": {
+    "main.css": "/patchwork/static/css/main.22de8ada.chunk.css",
+    "main.js": "/patchwork/static/js/main.90a6452e.chunk.js",
+    "main.js.map": "/patchwork/static/js/main.90a6452e.chunk.js.map",
+    "runtime~main.js": "/patchwork/static/js/runtime~main.c5928f42.js",
+    "runtime~main.js.map": "/patchwork/static/js/runtime~main.c5928f42.js.map",
+    "static/css/2.e21c74bf.chunk.css": "/patchwork/static/css/2.e21c74bf.chunk.css",
+    "static/js/2.7e3ccb6d.chunk.js": "/patchwork/static/js/2.7e3ccb6d.chunk.js",
+    "static/js/2.7e3ccb6d.chunk.js.map": "/patchwork/static/js/2.7e3ccb6d.chunk.js.map",
+    "index.html": "/patchwork/index.html",
+    "precache-manifest.89128eeb2acb6b48ff1c600c8869c1d2.js": "/patchwork/precache-manifest.89128eeb2acb6b48ff1c600c8869c1d2.js",
+    "service-worker.js": "/patchwork/service-worker.js",
+    "static/css/2.e21c74bf.chunk.css.map": "/patchwork/static/css/2.e21c74bf.chunk.css.map",
+    "static/css/main.22de8ada.chunk.css.map": "/patchwork/static/css/main.22de8ada.chunk.css.map"
+  }
 }
