@@ -12,7 +12,6 @@ import PatchBookEditor from "./PatchBookEditor";
 import RackToolbar from "./RackToolbar";
 import Loading from "./Loading";
 import moduleDB from "../modules.json";
-import * as patchworkApi from "../patchworkApi";
 import ShareDialog from "./ShareDialog";
 
 import * as patches from "../patches";
@@ -22,46 +21,62 @@ import Alert from "./Alert";
 
 let jackHighlightTimeout;
 
-const styles = theme => ({
+const styles = (theme) => ({
   app: {
     overflowX: "hidden",
-    overflowY: "hidden"
+    overflowY: "hidden",
   },
   appBar: {
-    width: "calc(100% - 12px)"
+    width: "calc(100% - 12px)",
   },
   jackClickInfoTypography: {
     display: "inline-block",
-    marginRight: 12
+    marginRight: 12,
   },
   jackClickInfo_Module: {
-    color: theme.palette.secondary.light
+    color: theme.palette.secondary.light,
   },
   jackClickInfo_Jack: {
-    color: theme.palette.grey[50]
+    color: theme.palette.grey[50],
   },
   jackClickInfo_Type: {
-    color: theme.palette.grey[50]
+    color: theme.palette.grey[50],
   },
   rackContainer: {
-    paddingTop: 20
+    paddingTop: 20,
   },
   editorContainer: {
     height: "100vh",
-    backgroundColor: "#272822"
+    backgroundColor: "#272822",
   },
   alertErrorText: {
     color: theme.palette.grey[50],
     display: "inline-block",
     verticalAlign: "top",
     marginLeft: 16,
-    marginTop: 3
+    marginTop: 3,
   },
   alertErrorIcon: {
     color: theme.palette.secondary.light,
-    marginTop: 2
-  }
+    marginTop: 2,
+  },
 });
+
+var base64URLtoBase64 = function (input) {
+  // Replace non-url compatible chars with base64 standard chars
+  input = input.replace(/-/g, "+").replace(/_/g, "/");
+
+  // Pad out with standard base64 required padding characters
+  var pad = input.length % 4;
+  if (pad) {
+    if (pad === 1) {
+      throw new Error("InvalidLengthError: Input base64url string is the wrong length to determine padding");
+    }
+    input += new Array(5 - pad).join("=");
+  }
+
+  return input;
+};
 
 class Patchwork extends Component {
   constructor() {
@@ -79,35 +94,27 @@ class Patchwork extends Component {
       shareUrl: "",
       alertOpen: false,
       alertShowDuration: 2000,
-      alertContent: null
+      alertContent: null,
     };
     this.shareDialogInputRef = React.createRef();
   }
   async componentDidMount() {
-    const { match } = this.props;
     this.setState({ loading: true });
-
-    const patchId = match.params.patchid;
     let patchMarkup = patches.example;
-    let fetchedMarkup;
-    if (patchId) {
-      try {
-        fetchedMarkup = await patchworkApi.getPatch(patchId);
-        if (!fetchedMarkup) {
-          this.showError("Requested patch not found", 5000);
-        }
-      } catch (error) {
-        this.showError("Error retrieving saved patch, the server may be down", 5000);
-      }
 
-      patchMarkup = fetchedMarkup || patchMarkup;
+    const search = this.props.location.search;
+    const queryParams = new URLSearchParams(search);
+    const queryPatch = queryParams.get("patch");
+
+    if (queryPatch) {
+      patchMarkup = atob(base64URLtoBase64(queryPatch));
     }
 
     const patch = patchMarkup && patchMarkup.length ? patchbook.parse(patchMarkup) : "";
-    const displayVoices = patch.voices ? patch.voices.map(v => v.name) : [];
+    const displayVoices = patch.voices ? patch.voices.map((v) => v.name) : [];
     this.setState({ markup: patchMarkup, patch: patch, displayVoices: displayVoices, loading: false, shareEnabled: this.isValidPatch(patch) });
   }
-  isValidPatch = patch => {
+  isValidPatch = (patch) => {
     return patch.voices.length > 0 && Object.keys(patch.modules).length > 0;
   };
   showError = (alert, showDuration) => {
@@ -122,13 +129,13 @@ class Patchwork extends Component {
             {alert}
           </Typography>
         </span>
-      )
+      ),
     });
   };
-  handleMarkupChanged = markup => {
+  handleMarkupChanged = (markup) => {
     const newPatch = patchbook.parse(markup);
     const newVoices = newPatch.voices.reduce((result, newPatchVoice) => {
-      if (!this.state.patch.voices.find(v => v.name === newPatchVoice.name)) {
+      if (!this.state.patch.voices.find((v) => v.name === newPatchVoice.name)) {
         result.push(newPatchVoice.name);
       }
       return result;
@@ -139,18 +146,18 @@ class Patchwork extends Component {
 
     this.setState({ patch: newPatch, displayVoices: displayVoices, markup: markup, shareEnabled: this.isValidPatch(newPatch) });
   };
-  handleRackZoom = value => {
+  handleRackZoom = (value) => {
     this.setState({ moduleHeight: value });
   };
-  handleVoiceToggle = e => {
+  handleVoiceToggle = (e) => {
     const { checked, value } = e.target;
     if (checked) {
       this.setState({ displayVoices: [...this.state.displayVoices, value] });
     } else {
-      this.setState({ displayVoices: this.state.displayVoices.filter(v => v !== value) });
+      this.setState({ displayVoices: this.state.displayVoices.filter((v) => v !== value) });
     }
   };
-  handleJackClick = jack => {
+  handleJackClick = (jack) => {
     const { classes } = this.props;
 
     this.setState({ jackClickedInfo: jack }, () => {
@@ -177,14 +184,13 @@ class Patchwork extends Component {
   handleAlertClose = () => {
     this.setState({ alertOpen: false });
   };
-  handleSelectedVoiceModulesOnlyChange = e => {
+  handleSelectedVoiceModulesOnlyChange = (e) => {
     this.setState({ selectedVoiceModulesOnly: e.target.checked });
   };
   handleShare = async () => {
     try {
-      const savedPatch = await patchworkApi.savePatch(this.state.markup);
-      const patch = JSON.parse(savedPatch);
-      this.setState({ shareDialogOpen: true, shareUrl: `${homepage}/${patch._id}` });
+      const encodedPatch = btoa(this.state.markup);
+      this.setState({ shareDialogOpen: true, shareUrl: `${homepage}?patch=${encodedPatch}` });
     } catch (error) {
       this.showError("Error saving patch, the server may be down", 5000);
     }
@@ -260,7 +266,7 @@ class Patchwork extends Component {
 
 Patchwork.propTypes = {
   classes: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired
+  match: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(Patchwork);
