@@ -6,7 +6,6 @@ const ContentContainer = () => {
   return (
     <Switch>
       <Route exact path="/" component={Patchwork} />
-      <Route path="/:patchid" component={Patchwork} />
     </Switch>
   );
 };
